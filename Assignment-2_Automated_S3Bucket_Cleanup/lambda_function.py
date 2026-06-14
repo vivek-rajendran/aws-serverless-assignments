@@ -3,18 +3,14 @@ import os
 from datetime import datetime, timezone, timedelta
 
 def lambda_handler(event, context):
-    """
-    AWS Lambda handler that connects to a specified S3 bucket and deletes 
-    all objects that have not been modified within the last 30 days.
-    """
     # 1. Initialize the boto3 S3 client
     s3_client = boto3.client('s3')
     
-    # TODO: Replace with your actual S3 bucket name
-    BUCKET_NAME = 'my-automated-cleanup-bucket-123' 
+    # Target bucket name
+    BUCKET_NAME = 'my-aws-automated-cleanup-bucket' 
     
-    # Define our age threshold (30 days ago from right now)
-    # AWS S3 stores metadata timestamps in UTC, so we must use timezone.utc
+    # TEMPORARY FOR TESTING: Set to 0 days so it matches the newly uploaded files!
+    # Once testing is verified, we will change this back to 30.
     age_threshold = datetime.now(timezone.utc) - timedelta(days=30)
     
     print(f"Starting cleanup routine for bucket: {BUCKET_NAME}")
@@ -24,20 +20,17 @@ def lambda_handler(event, context):
     
     try:
         # 2. List objects using a paginator
-        # Paginators handle buckets with >1,000 files gracefully without truncation
         paginator = s3_client.get_paginator('list_objects_v2')
         pages = paginator.paginate(Bucket=BUCKET_NAME)
         
         for page in pages:
-            # Check if the bucket contains any keys/objects
             if 'Contents' in page:
                 for obj in page['Contents']:
                     file_key = obj['Key']
                     file_last_modified = obj['LastModified']
                     
-                    # 3. Check if the object's age exceeds 30 days
+                    # 3. Age validation
                     if file_last_modified < age_threshold:
-                        # 4. Print the name of the deleted object for cloud logs
                         print(f"Deleting target match: {file_key} | Last Modified: {file_last_modified}")
                         
                         # Execute deletion command
