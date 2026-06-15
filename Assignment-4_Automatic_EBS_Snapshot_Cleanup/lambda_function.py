@@ -11,7 +11,7 @@ def lambda_handler(event, context):
     ec2_client = boto3.client('ec2')
     
     # Target configuration (Replace with your actual volume ID or use Lambda Environment Variables)
-    VOLUME_ID = os.environ.get('TARGET_VOLUME_ID', 'vol-0xxxxxxxxxxxxxxxx') 
+    VOLUME_ID = os.environ.get('TARGET_VOLUME_ID', 'vol-00295877ee6395d1d') 
     RETENTION_DAYS = 30
     
     print(f"🚀 Starting Automated EBS Lifecycle Management at {datetime.now(timezone.utc)}...")
